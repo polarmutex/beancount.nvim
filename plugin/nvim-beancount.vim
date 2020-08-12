@@ -1,3 +1,3 @@
 lua << EOF
-require "module-template".init()
+require "nvim-beancount".init()
 EOF

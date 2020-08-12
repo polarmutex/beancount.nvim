@@ -4,15 +4,22 @@ local M = {}
 
 -- TODO: In this function replace `module-template` with the actual name of your module.
 function M.init()
-  require "nvim-treesitter".define_modules {
-    module_template = {
-      module_path = "module-template.internal",
-      is_supported = function(lang)
-        -- TODO: you don't want your queries to be named `awesome-query`, do you ?
-        return queries.get_query(lang, 'awesome-query') ~= nil
-      end
+
+    require "nvim-treesitter.parsers".get_parser_configs().beancount = {
+        install_info = {
+            url = "https://github.com/bryall/tree-sitter-beancount",
+            files = {"src/parser.c"}
+        }
     }
-  }
+
+    require "nvim-treesitter".define_modules {
+        beancount = {
+            module_path = "nvim-beancount.internal",
+            is_supported = function(lang)
+                return lang == 'beancount'
+            end
+        }
+    }
 end
 
 return M
