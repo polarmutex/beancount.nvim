@@ -36,12 +36,7 @@ local function reverse(t)
     end
 end
 
-function M.CopyTransaction()
-
-    local bufnr = vim.api.nvim_get_current_buf()
-    local lang = parsers.get_buf_lang(bufnr)
-    if not lang then return end
-
+local function list_transactions(bufnr)
     local matches = queries.get_capture_matches(bufnr, "@txn", 'textobjects')
 
     -- TODO this is returning double nodes for each node
@@ -49,7 +44,7 @@ function M.CopyTransaction()
     local txns = {}
     local i = 1
     for _, m in ipairs(matches) do
-        if math.fmod(_,2) == 0 then
+        --if math.fmod(_,2) == 0 then
             if m.node then
                 local txn_string = ""
                 for _, line in pairs(ts_utils.get_node_text(m.node, bufnr)) do
@@ -58,16 +53,41 @@ function M.CopyTransaction()
                 txns[i] = txn_string
                 i = i + 1
             end
-        end
+        --end
     end
 
     reverse(txns)
 
-    local options = {}
-    options['source'] = txns
-    options['options'] = {"--no-multi", "--with-nth=1,3,4"}
-    options['down'] = "30%"
-    vim.fn['fzf#run'](options )
+    return txns
 end
+
+local function write_transaction(result)
+    local bufnr = vim.api.nvim_get_current_buf()
+
+    lines = {}
+    for str in string.gmatch(result, "([^" .."\n" .. "]+)") do
+        table.insert(lines, str)
+    end
+
+    local row, col = unpack(api.nvim_win_get_cursor(0))
+
+    api.nvim_buf_set_lines(bufnr,row, row, false, lines)
+end
+
+local function prepare_match(entry, kind)
+  local entries = {}
+
+  if entry.node then
+      entry["kind"] = kind
+      table.insert(entries, entry)
+  else
+    for name, item in pairs(entry) do
+        vim.list_extend(entries, prepare_match(item, name))
+    end
+  end
+
+  return entries
+end
+
 
 return M
