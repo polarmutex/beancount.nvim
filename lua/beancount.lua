@@ -2,7 +2,6 @@ local queries = require "nvim-treesitter.query"
 
 local M = {}
 
--- TODO: In this function replace `module-template` with the actual name of your module.
 function M.init()
 
     require "nvim-treesitter.parsers".get_parser_configs().beancount = {
@@ -21,23 +20,34 @@ function M.init()
         }
     }
 end
--- TODO: Think about how to do this.
-local function insert_value(prompt_bufnr)
-    local actions = require('telescope.actions')
-    local entry = actions.get_selected_entry(prompt_bufnr)
 
-    vim.schedule(function()
-        actions.close(prompt_bufnr)
-    end)
+local function prepare_match(entry, kind)
+    local entries = {}
 
+    if entry.node then
+        entry["kind"] = kind
+        table.insert(entries, entry)
+    else
+        for name, item in pairs(entry) do
+            vim.list_extend(entries, prepare_match(item, name))
+        end
+    end
 
-    local bufnr = vim.api.nvim_get_current_buf()
-    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-    vim.api.nvim_buf_set_lines(bufnr, row, row, false, lines)
+    return entries
+end
+
+local function reverse(t)
+    local n = #t
+    local i = 1
+    while i < n do
+        t[i],t[n] = t[n],t[i]
+        i = i + 1
+        n = n - 1
+    end
 end
 
 function M.CopyTransaction(opts)
-    local opts = opts or {}
+    opts = opts or {}
 
     local has_nvim_treesitter, nvim_treesitter = pcall(require, 'nvim-treesitter')
     if not has_nvim_treesitter then
@@ -57,13 +67,25 @@ function M.CopyTransaction(opts)
         return
     end
 
-    --local ts_locals = require('nvim-treesitter.locals')
+    local ts_locals = require('nvim-treesitter.locals')
     local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
 
-    local results = require('beancount.copytransactions').list_transactions(bufnr)
+    local results = {}
+    for _, definitions in ipairs(ts_locals.get_definitions(bufnr)) do
+        local entries = prepare_match(definitions)
+        for _, entry in ipairs(entries) do
+            if(entry.kind == "transaction") then
+                table.insert(results, entry)
+            end
+        end
+    end
+
     if vim.tbl_isempty(results) then
+        print('empty results')
         return
     end
+
+    reverse(results)
 
     local pickers = require('telescope.pickers')
     local finders = require('telescope.finders')
@@ -75,7 +97,7 @@ function M.CopyTransaction(opts)
         prompt    = 'Transactions',
         finder    = finders.new_table {
             results = results,
-            entry_maker = make_entry.gen_from_string(opts)
+            entry_maker = make_entry.gen_from_treesitter(opts)
         },
         previewer = previewers.vim_buffer.new(opts),
         sorter    = sorters.get_generic_fuzzy_sorter(),
