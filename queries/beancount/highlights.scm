@@ -1,22 +1,6 @@
-; Keywords
-[
-    "option"
-    "plugin"
-    "include"
-    "event"
-    "open"
-    "close"
-    "note"
-    "document"
-    "balance"
-    "price"
-    "pushtag"
-    "poptag"
-    "pad"
- ] @keyword
 
 (date) @number
-(flag) @property
+(txn) @property
 
 (account) @type
 
