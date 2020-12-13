@@ -106,7 +106,6 @@ function M.CopyTransaction(opts)
                 local selection = actions.get_selected_entry(prompt_bufnr)
                 actions.close(prompt_bufnr)
 
-                print(vim.inspect(selection))
                 local lines = vim.api.nvim_buf_get_lines(bufnr,selection.start,selection.finish,false)
 
                 local row, col = unpack(vim.api.nvim_win_get_cursor(0))
