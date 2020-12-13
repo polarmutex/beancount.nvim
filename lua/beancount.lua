@@ -92,6 +92,7 @@ function M.CopyTransaction(opts)
     local make_entry = require('telescope.make_entry')
     local sorters = require('telescope.sorters')
     local previewers = require('telescope.previewers')
+    local conf = require('telescope.config').values
     local actions = require('telescope.actions')
     pickers.new(opts, {
         prompt    = 'Transactions',
@@ -99,7 +100,7 @@ function M.CopyTransaction(opts)
             results = results,
             entry_maker = make_entry.gen_from_treesitter(opts)
         },
-        previewer = previewers.vim_buffer.new(opts),
+        previewer = conf.grep_previewer(opts),
         sorter    = sorters.get_generic_fuzzy_sorter(),
         attach_mappings = function( prompt_bufnr, map)
             local insert_txn = function ()
