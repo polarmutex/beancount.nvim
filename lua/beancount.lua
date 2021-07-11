@@ -1,15 +1,7 @@
-local queries = require "nvim-treesitter.query"
 
 local M = {}
 
 function M.init()
-
-    require "nvim-treesitter.parsers".get_parser_configs().beancount = {
-        install_info = {
-            url = "https://github.com/bryall/tree-sitter-beancount",
-            files = {"src/parser.c"}
-        }
-    }
 
     require "nvim-treesitter".define_modules {
         beancount = {
