@@ -86,6 +86,8 @@ function M.CopyTransaction(opts)
     local previewers = require('telescope.previewers')
     local conf = require('telescope.config').values
     local actions = require('telescope.actions')
+    local action_state = require "telescope.actions.state"
+
     pickers.new(opts, {
         prompt    = 'Transactions',
         finder    = finders.new_table {
@@ -96,7 +98,7 @@ function M.CopyTransaction(opts)
         sorter    = sorters.get_generic_fuzzy_sorter(),
         attach_mappings = function( prompt_bufnr, map)
             local insert_txn = function ()
-                local selection = actions.get_selected_entry(prompt_bufnr)
+                local selection = action_state.get_selected_entry()
                 actions.close(prompt_bufnr)
 
                 local lines = vim.api.nvim_buf_get_lines(bufnr,selection.start,selection.finish,false)
