@@ -10,7 +10,7 @@ function M.init()
     --        end,
     --    },
     --})
-    require('vim.treesitter.query').set_query(
+    require('vim.treesitter.query').set(
         'beancount',
         'locals',
         [[(transaction
