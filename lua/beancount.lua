@@ -14,8 +14,8 @@ function M.init()
         'beancount',
         'locals',
         [[(transaction
-    (date) @definition.date
-    (narration) @definition.payee) @definition.transaction
+    (date) @local.definition.date
+    (narration) @definition.payee) @local.definition.transaction
 ]]
     )
 end
